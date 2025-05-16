@@ -4,7 +4,6 @@
 #include "particle_data.h"
 #include "backends/iphysics_backend.h"
 #include "integrator.h"
-#include "collision_handler.h"
 #include <memory>   // For std::unique_ptr
 #include <string>
 #include <vector>   // For initial condition parameters potentially

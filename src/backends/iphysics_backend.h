@@ -1,12 +1,18 @@
 // src/backends/iphysics_backend.h
 #pragma once
 #include "../particle_data.h"
+#include <iostream>
 #include <vector> // For collision pairs
 
 struct CollisionPair {
     int p1_idx;
     int p2_idx;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const CollisionPair& cp) {
+    os << "CollisionPair(p1: " << cp.p1_idx << ", p2: " << cp.p2_idx << ")";
+    return os;
+}
 
 class IPhysicsBackend {
 public:

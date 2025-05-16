@@ -23,12 +23,12 @@ public:
     // Optional: Some integrators might need an initial setup if v and a are not aligned as expected.
     // For example, a basic Leapfrog might need an initial half-kick if v(0) and a(0) are given.
     // KDK with a(0) available is usually fine from the start.
-    virtual void initialize_step(ParticleData& particles, double dt, IPhysicsBackend* physics_backend) {
+    // virtual void initialize_step(ParticleData& particles, double dt, IPhysicsBackend* physics_backend) {
         // Default implementation: do nothing.
         // Can be overridden if an integrator needs a special first half-step.
         // For KDK, if a(0) is already computed and stored in particles.acc before the first 'step' call,
         // this might not be strictly necessary.
-    }
+    // }
 };
 
 // Kick-Drift-Kick Leapfrog Integrator

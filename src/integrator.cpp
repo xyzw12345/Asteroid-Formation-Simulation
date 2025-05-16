@@ -14,7 +14,6 @@ void LeapfrogKDKIntegrator::step(ParticleData& particles, double dt, IPhysicsBac
     // 1. First Kick: v(t + dt/2) = v(t) + a(t) * dt/2
     for (size_t i = 0; i < N; ++i) {
         if (!particles.active[i]) continue;
-        if (particles.sun_is_fixed && i == ParticleData::SUN_INDEX) continue;
 
         particles.velX[i] += particles.accX[i] * dt * 0.5;
         particles.velY[i] += particles.accY[i] * dt * 0.5;
@@ -25,7 +24,6 @@ void LeapfrogKDKIntegrator::step(ParticleData& particles, double dt, IPhysicsBac
     // 2. Drift: x(t + dt) = x(t) + v(t + dt/2) * dt
     for (size_t i = 0; i < N; ++i) {
         if (!particles.active[i]) continue;
-        if (particles.sun_is_fixed && i == ParticleData::SUN_INDEX) continue;
 
         particles.posX[i] += particles.velX[i] * dt;
         particles.posY[i] += particles.velY[i] * dt;
@@ -61,7 +59,6 @@ void LeapfrogKDKIntegrator::step(ParticleData& particles, double dt, IPhysicsBac
     // 4. Second Kick: v(t + dt) = v(t + dt/2) + a(t + dt) * dt/2
     for (size_t i = 0; i < N; ++i) {
         if (!particles.active[i]) continue;
-        if (particles.sun_is_fixed && i == ParticleData::SUN_INDEX) continue;
 
         particles.velX[i] += particles.accX[i] * dt * 0.5;
         particles.velY[i] += particles.accY[i] * dt * 0.5;
@@ -86,7 +83,6 @@ void EulerIntegrator::step(ParticleData& particles, double dt, IPhysicsBackend* 
     // 1. Update position: x(t + dt) = x(t) + v(t) * dt
     for (size_t i = 0; i < N; ++i) {
         if (!particles.active[i]) continue;
-        if (particles.sun_is_fixed && i == ParticleData::SUN_INDEX) continue;
 
         particles.posX[i] += particles.velX[i] * dt;
         particles.posY[i] += particles.velY[i] * dt;
@@ -97,7 +93,6 @@ void EulerIntegrator::step(ParticleData& particles, double dt, IPhysicsBackend* 
     //    Note: Euler uses a(t) for both position and velocity updates for the step t to t+dt.
     for (size_t i = 0; i < N; ++i) {
         if (!particles.active[i]) continue;
-        if (particles.sun_is_fixed && i == ParticleData::SUN_INDEX) continue;
 
         particles.velX[i] += particles.accX[i] * dt;
         particles.velY[i] += particles.accY[i] * dt;

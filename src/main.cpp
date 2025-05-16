@@ -12,7 +12,6 @@
 
 #include <iostream>
 #include <string>
-#include <numbers>
 #include <memory>   // For std::make_unique
 #include <stdexcept> // For std::stoi, std::stod for robust parsing
 #include <cmath>     // For std::pow, std::sqrt, M_PI
@@ -29,7 +28,7 @@ void print_usage(const char* prog_name) {
 
 int main(int argc, char** argv) {
     // --- Default Simulation Parameters ---
-    int n_asteroids = 100;                 // Default number of asteroids
+    int n_asteroids = 1000;                 // Default number of asteroids
     std::string backend_choice_str = "cpu_n2"; // Default backend
     double sim_duration_years = 5;      // Default simulation duration in years
 
@@ -83,30 +82,19 @@ int main(int argc, char** argv) {
     // Parameters for create_test_disk_normalized_units
     double min_orbit_radius_norm = 0.95;  
     double max_orbit_radius_norm = 1.05; 
-    double min_mass_norm = 1e-5;      
-    double max_mass_norm = 3e-5;      
+    double min_mass_norm = 1e-8;      
+    double max_mass_norm = 3e-8;      
     double perturbation_scale_frac = 0.05; // Velocity perturbation as fraction of Keplerian speed
 
-    InitialConditions::create_test_disk_normalized_units(sim.particles, n_asteroids,
+    InitialConditions::create_sun_and_asteroid_belt(sim.particles, n_asteroids,
                                                         min_orbit_radius_norm, max_orbit_radius_norm,
                                                         min_mass_norm, max_mass_norm,
                                                         perturbation_scale_frac);
+    
+    // sim.particles.add_particle(-1, 0, 0, 0, 0, 0, 1, 0.1);
+    // sim.particles.add_particle(1, 0, 0, 0, 0, 0, 1, 0.1);
 
-    // --- Initialize Simulation Run Parameters (Timestepping, Output - in SI units) ---
-    // These dt values are in SI seconds.
-    // A typical time unit in the G=1 system is 1 year / (2*pi).
-    // (1 year / (2pi)) ~= 5.02e6 seconds.
-    // Let's choose dt based on a fraction of this, or typical orbital periods.
-    // For inner belt (1 AU), period is 1 year. dt_max could be 1/100th of that.
-    double typical_time_unit_norm_sec = std::sqrt(std::pow(AU, 3) / (G_CONST * 1.989e30)); // Approx 5e6 s
-    
-    double dt_min_si = typical_time_unit_norm_sec / 10000.0; // e.g., ~500 seconds
-    double dt_max_si = typical_time_unit_norm_sec / 50.0;   // e.g., ~1e5 seconds (little over 1 day)
-    double safety_factor_dt = 0.05; // For adaptive timestep calculation
-    double output_interval_si = typical_time_unit_norm_sec * 0.5 * (2.0 * M_PI) ; // Output approx every 0.5 normalized time units (0.5 * 1_year_norm)
-                                                                                 // This is 0.5 year_SI
-    
-    sim.initialize_simulation_parameters(1e-6, 1e-3, 0.05, 0.3);
+    sim.initialize_simulation_parameters(1e-5, 1e-3, 0.05, 0.3);
 
     // --- Set Physics Backend ---
     if (backend_choice_str == "cpu_n2") {
@@ -129,11 +117,11 @@ int main(int argc, char** argv) {
 
     // --- Run Simulation ---
     // Convert desired simulation duration from years (SI) to seconds (SI)
-    double total_sim_time_seconds = sim_duration_years * 2 * std::numbers::pi;
+    double total_sim_time = sim_duration_years * 2 * PI_CONST;
     int max_steps = -1; // No step limit, run until time limit. Or set a value e.g., 10000.
 
     try {
-        sim.run_simulation(total_sim_time_seconds_si, max_steps);
+        sim.run_simulation(total_sim_time, max_steps);
     } catch (const std::exception& e) {
         std::cerr << "\n!!! Simulation run failed with an exception: " << e.what() << std::endl;
         // Perform any necessary cleanup if resources aren't RAII managed by sim destructor

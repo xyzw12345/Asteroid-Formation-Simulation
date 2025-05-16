@@ -1,8 +1,10 @@
 #include "cpu_n2_backend.h"
+#include "constants.h"
 #include <cmath>        // For std::sqrt, std::fabs
 #include <vector>       // For std::vector
 #include <limits>       // For std::numeric_limits
 #include <algorithm>    // For std::min
+#include <iostream>
 
 void CpuN2Backend::initialize(ParticleData* p_data) {
     particles = p_data;
@@ -12,6 +14,8 @@ void CpuN2Backend::compute_accelerations() {
     if (!particles || particles->capacity == 0) {
         return;
     }
+
+    // std::cout << "computing accelerations" << std::endl;
 
     particles->clear_accelerations_cpu(); // Zero out acc vectors on CPU
 
@@ -28,6 +32,12 @@ void CpuN2Backend::compute_accelerations() {
     auto& accY = particles->accY;
     auto& accZ = particles->accZ;
 
+    // for (size_t i = 0; i < N; ++i) {
+    //     if (!active[i]) continue;
+    //     std::cout << "particle: " << i << '\n'
+    //         << "position:" << posX[i] << " " << posY[i] << " " << posZ[i] << '\n'
+    //         << "velocity:" << particles->velX[i] << " "  << particles->velY[i] << " " << particles->velZ[i] << std::endl;
+    // }
     for (size_t i = 0; i < N; ++i) {
         if (!active[i]) continue;
 
@@ -47,7 +57,7 @@ void CpuN2Backend::compute_accelerations() {
             double dz = posZ[j] - pzi;
 
             double r_sq = dx * dx + dy * dy + dz * dz;
-            r_sq = std::max(r_sq, SOFTENING_EPSILON_SQUARED)
+            r_sq = std::max(r_sq, SOFTENING_EPSILON_SQUARED);
             
             // Gravitational softening to prevent extreme forces at close distances
             // F_vec = G * m_i * m_j * (r_vec / (r^2 + eps^2)^(3/2))
@@ -76,6 +86,7 @@ void CpuN2Backend::compute_accelerations() {
         accX[i] = sum_ax_i;
         accY[i] = sum_ay_i;
         accZ[i] = sum_az_i;
+        // std::cout << "acceleration:" << accX[i] << ' ' << accY[i] << ' ' << accZ[i] << std::endl;
     }
 }
 
@@ -112,6 +123,12 @@ std::vector<CollisionPair> CpuN2Backend::detect_collisions() {
             }
         }
     }
+    if (collision_pairs.size() != 0) {
+        std::cout << "detect_collisions" << std::endl;
+        for (const CollisionPair& pair : collision_pairs) {
+            std::cout << pair << std::endl;
+    }
+    }
     return collision_pairs;
 }
 
@@ -132,7 +149,6 @@ double CpuN2Backend::estimate_min_dt_component(double safety_factor) {
     const auto& accX = particles->accX;
     const auto& accY = particles->accY;
     const auto& accZ = particles->accZ;
-    const auto& radius = particles->radius;
     const auto& active = particles->active;
 
 
@@ -151,8 +167,8 @@ double CpuN2Backend::estimate_min_dt_component(double safety_factor) {
             double dist_sq = dx * dx + dy * dy + dz * dz;
             characteristic_length = std::min(characteristic_length, std::sqrt(dist_sq));
             }
-        }
-
+        
+        // std::cout << "Particle number " << i << ": characteristic length: " << characteristic_length << std::endl;
         if (v_sq > 1e-12) { // Avoid division by zero if particle is stationary
             double dt_v = safety_factor * characteristic_length / std::sqrt(v_sq);
             min_dt_val = std::min(min_dt_val, dt_v);
@@ -161,11 +177,11 @@ double CpuN2Backend::estimate_min_dt_component(double safety_factor) {
         // Criterion 2: Based on acceleration (time for velocity to change significantly relative to radius)
         // dt_a = safety_factor * sqrt(r_i / |a_i|)
         // This helps with particles starting from rest or in strong gravitational fields.
-        double a_sq = accX[i] * accX[i] + accY[i] * accY[i] + accZ[i] * accZ[i];
         if (a_sq > 1e-12) { // Avoid division by zero if no acceleration
             double dt_a = safety_factor * std::sqrt(characteristic_length / std::sqrt(a_sq)); // Note sqrt(r/|a|)
             min_dt_val = std::min(min_dt_val, dt_a);
         }    
-    
+    }
+    // std::cout << "estimate_min_dt_component:" << min_dt_val << std::endl;
     return min_dt_val;
 }

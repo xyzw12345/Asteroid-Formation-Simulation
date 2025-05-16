@@ -9,7 +9,6 @@
 
 #include <iostream>
 #include <algorithm>    // For std::min/max
-#include <numbers>
 #include <chrono>       
 #include <iomanip>      
 
@@ -128,7 +127,7 @@ void Simulation::run_simulation(double total_simulation_time_s, int max_sim_step
 
     std::cout << "\n--- Simulation Finished ---" << std::endl;
     std::cout << "Total steps: " << step_count << std::endl;
-    std::cout << "Final simulation time: " << current_time / (2 * std::numbers::pi) << " years"
+    std::cout << "Final simulation time: " << current_time / (2 * PI_CONST) << " years"
               << " (" << current_time << " s)" << std::endl;
     std::cout << "Total wall-clock time: " << sim_duration.count() << " s." << std::endl;
     if (step_count > 0) {
@@ -193,7 +192,7 @@ void Simulation::run_single_step() {
             int p1_current_idx = pair_idx_info.p1_idx;
             int p2_current_idx = pair_idx_info.p2_idx;
             bool result = particles.merge(p1_current_idx, p2_current_idx);
-            merged_this_step = merged_this_step || result
+            merged_this_step = merged_this_step || result;
         }
         if (merged_this_step) {
             // CPU state changed due to merge. GPU state is now stale.
@@ -219,12 +218,13 @@ void Simulation::run_single_step() {
 
     if (step_count % 100 == 0) { 
         std::cout << "Step: " << std::setw(7) << step_count
-                  << ", Time: " << std::fixed << std::setprecision(4) << current_time / (3600.0*24.0*365.25) << " yr"
+                  << ", Time: " << std::fixed << std::setprecision(4) << current_time / (2 * PI_CONST) << " yr"
                   << ", dt: " << std::scientific << std::setprecision(3) << dt_adaptive << " s"
                   << ", Active: " << std::setw(6) << particles.num_active_particles
                   << ", Step Walltime: " << std::fixed << std::setprecision(2) << step_duration_ms.count() << " ms"
                   << std::defaultfloat << std::endl;
     }
+    // char c = getchar(); // plays the role of system("pause")
 }
 
 
@@ -256,7 +256,7 @@ void Simulation::update_adaptive_timestep() {
 void Simulation::output_snapshot(int step_num) {
     std::cout << "\n--- Snapshot at Step: " << std::setw(7) << step_num 
               << ", Sim Time: " << std::fixed << std::setprecision(4) 
-              << current_time / (2 * std::numbers::pi) << " years ---" << std::defaultfloat << std::endl;
+              << current_time / (2 * PI_CONST) << " years ---" << std::defaultfloat << std::endl;
     std::cout << "Active Particles: " << particles.num_active_particles << std::endl;
     std::cout << "Current dt: " << std::scientific << std::setprecision(3) << dt_adaptive << " s" 
               << std::defaultfloat << std::endl;

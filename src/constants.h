@@ -6,6 +6,7 @@
 // Physical Constants
 constexpr double G_CONST = 1; // Gravitational constant (m^3 kg^-1 s^-2)
 constexpr double AU = 1;        // Astronomical Unit (meters)
+constexpr double PI_CONST = 3.141592653589793238;
 
 // Simulation Parameters
 // Softening length squared to prevent singularities in N-body gravity.

@@ -3,6 +3,7 @@
 #include <stdexcept>    // For std::runtime_error
 #include <algorithm>    // For std::fill
 #include <iostream>     // For std::cerr
+#include <cmath>
 
 #ifdef USE_CUDA
 #include <cuda_runtime.h> // For cudaMemset, cudaMalloc, cudaFree, cudaMemcpy
@@ -53,7 +54,7 @@ int ParticleData::add_particle(double pX, double pY, double pZ,
                                double vX, double vY, double vZ,
                                double m, double r) {
     if (current_num_particles >= capacity) {
-        throw std::runtime_error("ParticleData: Exceeded pre-allocated capacity. Cannot add more particles.");
+        throw std::runtime_error("ParticleData: Exceeded pre-allocated capacity. Cannot add more ");
     }
     if (next_available_original_id >= static_cast<int>(capacity)) {
         // This case implies we are trying to assign an original_id that's too large for DSU arrays
@@ -135,37 +136,37 @@ bool ParticleData::merge(int original_particle_id1, int original_particle_id2) {
         dsu_parent[root2] = root1;
         dsu_set_size[root1] += dsu_set_size[root2];
 
-        double m_survivor = particles.mass[root1];
-        double m_victim = particles.mass[root2];
+        double m_survivor = mass[root1];
+        double m_victim = mass[root2];
         double m_new_total = m_survivor + m_victim;
 
         // 1. Conserve Momentum: new_vel = (m1*v1 + m2*v2) / (m1+m2)
         //    New velocity for the survivor.
-        particles.velX[root1] = (m_survivor * particles.velX[root1] + m_victim * particles.velX[root2]) / m_new_total;
-        particles.velY[root1] = (m_survivor * particles.velY[root1] + m_victim * particles.velY[root2]) / m_new_total;
-        particles.velZ[root1] = (m_survivor * particles.velZ[root1] + m_victim * particles.velZ[root2]) / m_new_total;
+        velX[root1] = (m_survivor * velX[root1] + m_victim * velX[root2]) / m_new_total;
+        velY[root1] = (m_survivor * velY[root1] + m_victim * velY[root2]) / m_new_total;
+        velZ[root1] = (m_survivor * velZ[root1] + m_victim * velZ[root2]) / m_new_total;
 
         // 2. New Position (Center of Mass): new_pos = (m1*p1 + m2*p2) / (m1+m2)
         //    New position for the survivor.
-        particles.posX[root1] = (m_survivor * particles.posX[root1] + m_victim * particles.posX[root2]) / m_new_total;
-        particles.posY[root1] = (m_survivor * particles.posY[root1] + m_victim * particles.posY[root2]) / m_new_total;
-        particles.posZ[root1] = (m_survivor * particles.posZ[root1] + m_victim * particles.posZ[root2]) / m_new_total;
+        posX[root1] = (m_survivor * posX[root1] + m_victim * posX[root2]) / m_new_total;
+        posY[root1] = (m_survivor * posY[root1] + m_victim * posY[root2]) / m_new_total;
+        posZ[root1] = (m_survivor * posZ[root1] + m_victim * posZ[root2]) / m_new_total;
         
         // 3. New Mass:
-        particles.mass[root1] = m_new_total;
+        mass[root1] = m_new_total;
 
         // 4. New Radius:
         //    Assuming constant density and spherical particles: Volume_new = Volume1 + Volume2
         //    (4/3)*pi*r_new^3 = (4/3)*pi*r1^3 + (4/3)*pi*r2^3
         //    r_new^3 = r1^3 + r2^3  => r_new = cbrt(r1^3 + r2^3)
-        double r1_cubed = particles.radius[root1] * particles.radius[root1] * particles.radius[root1];
-        double r2_cubed = particles.radius[root2] * particles.radius[root2] * particles.radius[root2];
-        particles.radius[root1] = std::cbrt(r1_cubed + r2_cubed);
+        double r1_cubed = radius[root1] * radius[root1] * radius[root1];
+        double r2_cubed = radius[root2] * radius[root2] * radius[root2];
+        radius[root1] = std::cbrt(r1_cubed + r2_cubed);
 
         // 5. Mark Victim as Inactive:
-        particles.active[root2] = false;
+        active[root2] = false;
 
-        particles.num_active_particles--;
+        num_active_particles--;
 
         return true; // Union occurred
     }

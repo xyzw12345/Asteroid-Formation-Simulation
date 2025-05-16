@@ -6,7 +6,7 @@
 
 namespace InitialConditions {
 
-void create_test_disk_normalized_units(ParticleData& particles,
+void create_sun_and_asteroid_belt(ParticleData& particles,
                                        int n_asteroids,
                                        double min_orbit_radius_norm, double max_orbit_radius_norm,
                                        double min_mass_norm, double max_mass_norm,
@@ -25,12 +25,12 @@ void create_test_disk_normalized_units(ParticleData& particles,
         return;
     }
 
-    int sun_idx = particles.add_particle(0.0, 0.0, 0.0,      // Position (SI)
-                                         0.0, 0.0, 0.0,      // Velocity (SI)
-                                         1, 4.64e-3);
+    double sun_mass = 1;
+    double sun_radius = 4.64e-3;
+    particles.add_particle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, sun_mass, sun_radius);
     
-    double asteroid_density = 9.280e6
-    std::mt19937 rng(1)
+    double asteroid_density = 9.280e6;
+    std::mt19937 rng(1);
     // std::mt19937 rng(std::random_device{}()); // Use random_device for better seeding, or a fixed seed for reproducibility
     std::uniform_real_distribution<double> dist_uniform_01(0.0, 1.0); // For converting to specific ranges
     std::normal_distribution<double> dist_normal_01(0.0, 1.0);   // Standard normal distribution
@@ -44,12 +44,10 @@ void create_test_disk_normalized_units(ParticleData& particles,
         
         double x_norm = r_norm * std::cos(theta_norm);
         double y_norm = r_norm * std::sin(theta_norm);
-        // z = np.random.normal(0, 0.01 * r)
         double z_norm = dist_normal_01(rng) * (0.01 * r_norm);
 
         // Velocity (Keplerian in normalized units + perturbation)
-        // speed_circ_norm = np.sqrt(G_norm * SUN_MASS_norm / r_norm)
-        double speed_circ_norm = std::sqrt(G_norm * sun_mass_norm / r_norm);
+        double speed_circ_norm = std::sqrt(G_CONST * sun_mass / r_norm);
         
         double vx_norm = -speed_circ_norm * std::sin(theta_norm);
         double vy_norm = speed_circ_norm * std::cos(theta_norm);
