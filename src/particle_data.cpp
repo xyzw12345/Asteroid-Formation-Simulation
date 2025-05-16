@@ -238,7 +238,7 @@ void ParticleData::copy_all_to_gpu() {
 
     size_t N_bytes_double = capacity * sizeof(double);
     size_t N_bytes_int    = capacity * sizeof(int);
-    size_t N_bytes_bool   = capacity * sizeof(bool);
+    size_t N_bytes_bool_transfer   = capacity * sizeof(unsigned char); 
 
     CUDA_CHECK(cudaMemcpy(d_posX, posX.data(), N_bytes_double, cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(d_posY, posY.data(), N_bytes_double, cudaMemcpyHostToDevice));
@@ -252,7 +252,13 @@ void ParticleData::copy_all_to_gpu() {
     CUDA_CHECK(cudaMemcpy(d_mass, mass.data(), N_bytes_double, cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(d_radius, radius.data(), N_bytes_double, cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(d_id, id.data(), N_bytes_int, cudaMemcpyHostToDevice));
-    CUDA_CHECK(cudaMemcpy(d_active, active.data(), N_bytes_bool, cudaMemcpyHostToDevice));
+    if (capacity > 0) {
+        std::vector<unsigned char> active_char_buffer(capacity);
+        for (size_t i = 0; i < capacity; ++i) {
+            active_char_buffer[i] = static_cast<unsigned char>(active[i]);
+        }
+        CUDA_CHECK(cudaMemcpy(d_active, active_char_buffer.data(), N_bytes_bool_transfer, cudaMemcpyHostToDevice));
+    }
 #endif
 }
 
@@ -262,7 +268,7 @@ void ParticleData::copy_pos_vel_mass_radius_active_id_to_gpu() {
 
     size_t N_bytes_double = capacity * sizeof(double);
     size_t N_bytes_int    = capacity * sizeof(int);
-    size_t N_bytes_bool   = capacity * sizeof(bool);
+    size_t N_bytes_bool_transfer   = capacity * sizeof(unsigned char); 
 
     CUDA_CHECK(cudaMemcpy(d_posX, posX.data(), N_bytes_double, cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(d_posY, posY.data(), N_bytes_double, cudaMemcpyHostToDevice));
@@ -273,7 +279,13 @@ void ParticleData::copy_pos_vel_mass_radius_active_id_to_gpu() {
     CUDA_CHECK(cudaMemcpy(d_mass, mass.data(), N_bytes_double, cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(d_radius, radius.data(), N_bytes_double, cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(d_id, id.data(), N_bytes_int, cudaMemcpyHostToDevice));
-    CUDA_CHECK(cudaMemcpy(d_active, active.data(), N_bytes_bool, cudaMemcpyHostToDevice));
+    if (capacity > 0) {
+        std::vector<unsigned char> active_char_buffer(capacity);
+        for (size_t i = 0; i < capacity; ++i) {
+            active_char_buffer[i] = static_cast<unsigned char>(active[i]);
+        }
+        CUDA_CHECK(cudaMemcpy(d_active, active_char_buffer.data(), N_bytes_bool_transfer, cudaMemcpyHostToDevice));
+    }
 #endif
 }
 
@@ -294,7 +306,7 @@ void ParticleData::copy_all_from_gpu() {
 
     size_t N_bytes_double = capacity * sizeof(double);
     size_t N_bytes_int    = capacity * sizeof(int);
-    size_t N_bytes_bool   = capacity * sizeof(bool);
+    size_t N_bytes_bool_transfer   = capacity * sizeof(unsigned char); 
 
     CUDA_CHECK(cudaMemcpy(posX.data(), d_posX, N_bytes_double, cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(posY.data(), d_posY, N_bytes_double, cudaMemcpyDeviceToHost));
@@ -308,7 +320,13 @@ void ParticleData::copy_all_from_gpu() {
     CUDA_CHECK(cudaMemcpy(mass.data(), d_mass, N_bytes_double, cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(radius.data(), d_radius, N_bytes_double, cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(id.data(), d_id, N_bytes_int, cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(active.data(), d_active, N_bytes_bool, cudaMemcpyDeviceToHost));
+    if (capacity > 0) {
+        std::vector<unsigned char> active_char_buffer(capacity);
+        CUDA_CHECK(cudaMemcpy(active_char_buffer.data(), d_active, N_bytes_bool_transfer, cudaMemcpyDeviceToHost));
+        for (size_t i = 0; i < capacity; ++i) {
+            active_char_buffer[i] = ((active[i] & 1) == 1);
+        }
+    }
 #endif
 }
 
@@ -318,7 +336,7 @@ void ParticleData::copy_pos_vel_mass_radius_active_id_from_gpu() {
 
     size_t N_bytes_double = capacity * sizeof(double);
     size_t N_bytes_int    = capacity * sizeof(int);
-    size_t N_bytes_bool   = capacity * sizeof(bool);
+    size_t N_bytes_bool_transfer   = capacity * sizeof(unsigned char); 
 
     CUDA_CHECK(cudaMemcpy(posX.data(), d_posX, N_bytes_double, cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(posY.data(), d_posY, N_bytes_double, cudaMemcpyDeviceToHost));
@@ -329,7 +347,13 @@ void ParticleData::copy_pos_vel_mass_radius_active_id_from_gpu() {
     CUDA_CHECK(cudaMemcpy(mass.data(), d_mass, N_bytes_double, cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(radius.data(), d_radius, N_bytes_double, cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(id.data(), d_id, N_bytes_int, cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(active.data(), d_active, N_bytes_bool, cudaMemcpyDeviceToHost));
+    if (capacity > 0) {
+        std::vector<unsigned char> active_char_buffer(capacity);
+        CUDA_CHECK(cudaMemcpy(active_char_buffer.data(), d_active, N_bytes_bool_transfer, cudaMemcpyDeviceToHost));
+        for (size_t i = 0; i < capacity; ++i) {
+            active_char_buffer[i] = ((active[i] & 1) == 1);
+        }
+    }
 #endif
 }
 

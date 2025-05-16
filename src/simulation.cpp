@@ -3,14 +3,14 @@
 #include "initial_conditions.h" // For particle setup
 #include "backends/cpu_n2_backend.h" 
 #include "integrator.h"     
-#ifdef USE_CUDA
-// #include "backends/cuda_n2_backend.h" 
-#endif
-
 #include <iostream>
 #include <algorithm>    // For std::min/max
 #include <chrono>       
-#include <iomanip>      
+#include <iomanip> 
+
+#ifdef USE_CUDA
+#include "backends/cuda_n2_backend.h" 
+#endif
 
 Simulation::Simulation() {
     // ParticleData is default constructed. It needs initialize_storage called.

@@ -7,7 +7,7 @@
 #include "backends/cpu_n2_backend.h"
 // #include "backends/cpu_spatial_hash_backend.h"
 #ifdef USE_CUDA
-// #include "backends/cuda_n2_backend.h"
+#include "backends/cuda_n2_backend.h"
 #endif
 
 #include <iostream>
@@ -28,7 +28,7 @@ void print_usage(const char* prog_name) {
 
 int main(int argc, char** argv) {
     // --- Default Simulation Parameters ---
-    int n_asteroids = 1000;                 // Default number of asteroids
+    int n_asteroids = 10000;                 // Default number of asteroids
     std::string backend_choice_str = "cpu_n2"; // Default backend
     double sim_duration_years = 5;      // Default simulation duration in years
 
@@ -103,11 +103,11 @@ int main(int argc, char** argv) {
 //     else if (backend_choice_str == "cpu_spatial_hash") {
 //         sim.set_physics_backend(std::make_unique<CpuSpatialHashBackend>());
 //     } 
-// #ifdef USE_CUDA
-//     else if (backend_choice_str == "cuda_n2") {
-//         sim.set_physics_backend(std::make_unique<CudaN2Backend>());
-//     }
-// #endif
+#ifdef USE_CUDA
+    else if (backend_choice_str == "cuda_n2") {
+        sim.set_physics_backend(std::make_unique<CudaN2Backend>());
+    }
+#endif
     else {
         std::cerr << "Warning: Unknown backend choice '" << backend_choice_str 
                   << "'. Defaulting to 'cpu_n2'." << std::endl;

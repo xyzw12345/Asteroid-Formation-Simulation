@@ -10,7 +10,7 @@
 
 // Forward declaration for specific backends if needed for type checking in main/elsewhere
 #ifdef USE_CUDA
-// class CudaN2Backend; // Example, if specific check is needed outside simulation.cpp
+class CudaN2Backend; // Example, if specific check is needed outside simulation.cpp
 #endif
 
 
