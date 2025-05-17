@@ -216,7 +216,7 @@ void Simulation::run_single_step() {
     auto step_end_chrono = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> step_duration_ms = step_end_chrono - step_start_chrono;
 
-    if (step_count % 100 == 0) { 
+    if (step_count % 5 == 0) { 
         std::cout << "Step: " << std::setw(7) << step_count
                   << ", Time: " << std::fixed << std::setprecision(4) << current_time / (2 * PI_CONST) << " yr"
                   << ", dt: " << std::scientific << std::setprecision(3) << dt_adaptive << " s"

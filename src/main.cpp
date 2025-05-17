@@ -28,8 +28,8 @@ void print_usage(const char* prog_name) {
 
 int main(int argc, char** argv) {
     // --- Default Simulation Parameters ---
-    int n_asteroids = 10000;                 // Default number of asteroids
-    std::string backend_choice_str = "cpu_n2"; // Default backend
+    int n_asteroids = 1000;                 // Default number of asteroids
+    std::string backend_choice_str = "cuda_n2"; // Default backend
     double sim_duration_years = 5;      // Default simulation duration in years
 
     // --- Parse Command-Line Arguments (Basic) ---
