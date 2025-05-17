@@ -28,7 +28,7 @@ void print_usage(const char* prog_name) {
 
 int main(int argc, char** argv) {
     // --- Default Simulation Parameters ---
-    int n_asteroids = 1000;                 // Default number of asteroids
+    int n_asteroids = 50000;                 // Default number of asteroids
     std::string backend_choice_str = "cuda_n2"; // Default backend
     double sim_duration_years = 5;      // Default simulation duration in years
 
@@ -61,11 +61,11 @@ int main(int argc, char** argv) {
     }
 
 
-    std::cout << "--- N-Body Asteroid Formation Simulation ---" << std::endl;
-    std::cout << "Selected number of asteroids: " << n_asteroids << std::endl;
-    std::cout << "Selected backend: " << backend_choice_str << std::endl;
-    std::cout << "Selected simulation duration: " << sim_duration_years << " years." << std::endl;
-    std::cout << "--------------------------------------------" << std::endl;
+    // std::cout << "--- N-Body Asteroid Formation Simulation ---" << std::endl;
+    // std::cout << "Selected number of asteroids: " << n_asteroids << std::endl;
+    // std::cout << "Selected backend: " << backend_choice_str << std::endl;
+    // std::cout << "Selected simulation duration: " << sim_duration_years << " years." << std::endl;
+    // std::cout << "--------------------------------------------" << std::endl;
 
 
     // --- Create Simulation Object ---
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
     // --- Run Simulation ---
     // Convert desired simulation duration from years (SI) to seconds (SI)
     double total_sim_time = sim_duration_years * 2 * PI_CONST;
-    int max_steps = -1; // No step limit, run until time limit. Or set a value e.g., 10000.
+    int max_steps = 1000; // No step limit, run until time limit. Or set a value e.g., 10000.
 
     try {
         sim.run_simulation(total_sim_time, max_steps);

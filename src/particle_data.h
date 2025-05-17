@@ -78,7 +78,7 @@ public:
     // Copy data between Host (CPU) and Device (GPU)
     // These typically copy 'capacity' elements because GPU kernels often iterate over 'capacity'.
     void copy_all_to_gpu();
-    void copy_pos_vel_mass_radius_active_id_to_gpu();
+    void copy_pos_vel_to_gpu();
     void copy_acc_to_gpu(); // Host to Device
     
     void copy_all_from_gpu();

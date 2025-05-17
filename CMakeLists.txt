@@ -125,7 +125,7 @@ else() # Flags for GCC, Clang, and other compatible compilers
         -Wall
         -Wextra
         -pedantic
-        $<$<CONFIG:Debug>:-g -O3>
+        $<$<CONFIG:Debug>:-g -pg -O3>
         $<$<CONFIG:Release>:-O3 -DNDEBUG>
     )
     if(CMAKE_CUDA_COMPILER) # Flags for nvcc when host compiler is GCC/Clang
@@ -139,7 +139,7 @@ else() # Flags for GCC, Clang, and other compatible compilers
             $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall>
             $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wextra>
             $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-pedantic>
-            $<$<COMPILE_LANGUAGE:CUDA>:$<$<CONFIG:Debug>:-Xcompiler=-O3;-Xcompiler=-DNDEBUG;-Xcompiler=-march=native;-Xcompiler=-ffast-maths>>
+            $<$<COMPILE_LANGUAGE:CUDA>:$<$<CONFIG:Debug>:-Xcompiler=-O3;-Xcompiler=-DNDEBUG;-Xcompiler=-march=native;-Xcompiler=-ffast-math>>
             $<$<COMPILE_LANGUAGE:CUDA>:$<$<CONFIG:Release>:-Xcompiler=-O3;-Xcompiler=-DNDEBUG;-Xcompiler=-march=native;-Xcompiler=-ffast-math>>
         )
     endif()

@@ -80,7 +80,6 @@ void Simulation::run_simulation(double total_simulation_time_s, int max_sim_step
         physics_backend->initialize(&particles);
     }
 
-
     // Initial GPU setup if using CUDA backend
     if (is_cuda_backend()) {
         std::cout << "CUDA backend detected. Allocating GPU memory and copying initial data..." << std::endl;
@@ -164,14 +163,6 @@ void Simulation::run_single_step() {
     // - CPU particles.posX/velX are updated to t+dt.
     // - If physics_backend was GPU, d_acc contains a(t+dt). CPU particles.acc is still a(t).
 
-    if (is_cuda_backend()) {
-        // Sync a(t+dt) from GPU (where physics_backend computed it) to CPU.
-        particles.copy_acc_from_gpu();
-        // Now CPU particles.acc also contains a(t+dt).
-        // The KDK integrator's second kick (if it happened after the physics_backend call *within* integrator->step)
-        // would have used this now-synced CPU a(t+dt).
-        // This sequence means the KDK's second kick used the correct new accelerations.
-    }
     // At this point, CPU: x(t+dt), v(t+dt), a(t+dt) are all consistent.
     // GPU: d_posX, d_velX still reflect pre-integrator state or state after first KDK parts if synced.
     //      d_acc has a(t+dt).
@@ -180,7 +171,7 @@ void Simulation::run_single_step() {
     std::vector<CollisionPair> collision_pairs;
     if (is_cuda_backend()) {
         // Collision detection needs up-to-date positions x(t+dt) on GPU.
-        particles.copy_pos_vel_mass_radius_active_id_to_gpu(); // This copies x(t+dt), v(t+dt) from CPU to GPU
+        particles.copy_pos_vel_to_gpu(); // This copies x(t+dt), v(t+dt) from CPU to GPU
     }
     // Now GPU d_posX has x(t+dt).
     collision_pairs = physics_backend->detect_collisions(); // Uses d_posX if GPU backend.
@@ -272,12 +263,15 @@ void Simulation::output_snapshot(int step_num) {
             std::cout << "  P" << std::setw(4) << particles.id[i] << " (idx " << std::setw(4) << i << "): "
                       << "m=" << std::scientific << std::setprecision(2) << particles.mass[i] << std::defaultfloat
                       << " r=" << std::fixed << std::setprecision(0) << particles.radius[i]
-                      << " pos=(" << std::fixed << std::setprecision(3) << particles.posX[i] / AU << ", "
+                      << " pos=(" << std::fixed << std::setprecision(5) << particles.posX[i] / AU << ", "
                                   << particles.posY[i] / AU << ", "
-                                  << particles.posZ[i] / AU << ")"
-                      << " vel=(" << std::scientific << std::setprecision(2) << particles.velX[i] << ", "
+                                  << particles.posZ[i] / AU << ")" << '\n'
+                      << " vel=(" << std::scientific << std::setprecision(5) << particles.velX[i] << ", "
                                   << particles.velY[i] << ", "
-                                  << particles.velZ[i] << ")"
+                                  << particles.velZ[i] << ")" << '\n'
+                      << " acc=(" << std::scientific << std::setprecision(5) << particles.accX[i] << ", "
+                                  << particles.accY[i] << ", "
+                                  << particles.accZ[i] << ")" << '\n'
                       << std::defaultfloat << std::endl;
             print_count++;
         }
